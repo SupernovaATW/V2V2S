@@ -1,5 +1,4 @@
 import { spawn, execFile } from 'child_process';
-import path from 'path';
 import { getFfmpegPath, getFfprobePath } from '../utils/paths';
 
 export interface FFmpegProgress {
@@ -33,6 +32,7 @@ export function extractAudio(
 ): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const ffmpeg = getFfmpegPath();
+    console.log('[FFmpeg] path:', ffmpeg, 'input:', inputPath);
 
     const args = [
       '-i', inputPath,
