@@ -1,0 +1,61 @@
+{
+  "name": "v2v2s",
+  "productName": "V2V2S",
+  "version": "1.0.0",
+  "description": "Video to Audio to Subtitles",
+  "main": ".vite/build/index.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "build": "npx vite build --config vite.renderer.config.ts",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.v2v2s.app",
+    "productName": "V2V2S",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      ".vite/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "resources/ffmpeg/win32-x64", "to": "ffmpeg" },
+      { "from": "resources/whisper/win32-x64", "to": "whisper" },
+      { "from": "models", "to": "models" }
+    ],
+    "win": {
+      "icon": "assets/logo.png",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/logo.ico",
+      "uninstallerIcon": "assets/logo.ico"
+    }
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-vite": "^7.6.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.20",
+    "electron": "^33.4.11",
+    "electron-builder": "^26.15.3",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "i18next": "^24.1.0",
+    "lucide-react": "^0.460.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^15.1.0"
+  }
+}

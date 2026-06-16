@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Light Theme (default) ===== */
+:root {
+  --bg-primary: #faf9f5;
+  --bg-sidebar: #f0efe9;
+  --bg-card: #ffffff;
+  --bg-input: #f5f3ef;
+  --bg-hover: #ebe8e1;
+  --text-primary: #1a1815;
+  --text-secondary: #6b6560;
+  --accent: #cc785c;
+  --accent-hover: #a9583e;
+  --border: #d4d0c8;
+  --border-subtle: #e5e2da;
+  --success: #3d8b4f;
+  --warning: #c47a2e;
+  --error: #b33a3a;
+}
+
+/* ===== Dark Theme ===== */
+.dark {
+  --bg-primary: #181715;
+  --bg-sidebar: #1f1e1b;
+  --bg-card: #252320;
+  --bg-input: #2a2824;
+  --bg-hover: #302e2a;
+  --text-primary: #faf9f5;
+  --text-secondary: #a09d96;
+  --accent: #cc785c;
+  --accent-hover: #a9583e;
+  --border: #3d3d3a;
+  --border-subtle: #2a2824;
+  --success: #5db872;
+  --warning: #e8a55a;
+  --error: #c64545;
+}
+
+/* ===== Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: Georgia, "SimSun", "宋体", serif;
+  font-weight: 500;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ===== Drag Region for Title Bar ===== */
+.titlebar-drag {
+  -webkit-app-region: drag;
+}
+
+.titlebar-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* ===== Focus ===== */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Selection ===== */
+::selection {
+  background: rgba(204, 120, 92, 0.3);
+  color: var(--text-primary);
+}

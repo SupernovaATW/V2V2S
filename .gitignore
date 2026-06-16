@@ -1,0 +1,10 @@
+node_modules/
+dist/
+out/
+.vite/
+models/
+resources/ffmpeg/
+resources/whisper/
+*.part
+*.zip
+ffmpeg-essentials*
