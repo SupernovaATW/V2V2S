@@ -13,18 +13,25 @@ export function registerAudioExtractionHandlers(getMainWindow: () => BrowserWind
     const baseName = path.basename(task.inputPath, path.extname(task.inputPath));
     const outputPath = path.join(outputDir, `${baseName}.wav`);
 
-    await extractAudio(task.inputPath, outputPath, (progress) => {
-      task.percent = progress.percent;
-      if (win) {
-        win.webContents.send(IPC.QUEUE_TASK_PROGRESS, {
-          taskId: task.id,
-          percent: progress.percent,
-          status: 'running',
-        });
-      }
-    });
+    console.log('[extract] Starting:', task.inputPath, '->', outputPath);
 
-    task.outputPath = outputPath;
+    try {
+      await extractAudio(task.inputPath, outputPath, (progress) => {
+        task.percent = progress.percent;
+        if (win && !win.isDestroyed()) {
+          win.webContents.send(IPC.QUEUE_TASK_PROGRESS, {
+            taskId: task.id,
+            percent: progress.percent,
+            status: 'running',
+          });
+        }
+      });
+      console.log('[extract] Done:', outputPath);
+      task.outputPath = outputPath;
+    } catch (err: any) {
+      console.error('[extract] Failed:', err.message);
+      throw err;
+    }
 
     // Chain: auto-create transcribe task if requested
     if (task.autoTranscribe && task.transcribeModelId) {

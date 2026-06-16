@@ -9,7 +9,6 @@ export class TaskQueueService {
   private maxConcurrency = 1;
   private activeCount = 0;
   private listeners: Set<QueueListener> = new Set();
-  private executor: TaskExecutor | null = null;
   private taskExecutors: Map<TaskType, TaskExecutor> = new Map();
 
   registerExecutor(type: TaskType, executor: TaskExecutor): void {
@@ -108,6 +107,7 @@ export class TaskQueueService {
       task.status = 'completed';
       task.percent = 100;
     } catch (err: any) {
+      console.error('[TaskQueue] Failed:', task.type, task.label, err?.message || err);
       task.status = 'failed';
       task.error = err?.message || String(err);
     } finally {
