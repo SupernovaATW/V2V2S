@@ -7,15 +7,13 @@ export function useTaskQueue() {
 
   useEffect(() => {
     if (!api) return;
-    // Initial load
-    api.getQueueState().then(setState).catch(() => {});
-    // Listen for changes
-    const unsub = api.onQueueStateChanged(setState);
-    // Poll every 1s as safety net
-    const interval = setInterval(() => {
-      api.getQueueState().then(setState).catch(() => {});
-    }, 1000);
-    return () => { unsub(); clearInterval(interval); };
+    const load = async () => {
+      const s = await api.getQueueState();
+      setState(s);
+    };
+    load();
+    const unsub = api.onQueueStateChanged((s) => { setState(s); });
+    return () => { unsub(); };
   }, []);
 
   const pause = useCallback(() => api.pauseQueue(), []);
