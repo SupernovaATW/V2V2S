@@ -13,56 +13,54 @@ export function registerAudioExtractionHandlers(getMainWindow: () => BrowserWind
     const baseName = path.basename(task.inputPath, path.extname(task.inputPath));
     const outputPath = path.join(outputDir, `${baseName}.wav`);
 
-    try {
-      await extractAudio(task.inputPath, outputPath, (progress) => {
-        task.percent = progress.percent;
-        if (win && !win.isDestroyed()) {
-          win.webContents.send(IPC.QUEUE_TASK_PROGRESS, {
-            taskId: task.id,
-            percent: progress.percent,
-            status: 'running',
-          });
-        }
-      }, task);
-      task.outputPath = outputPath;
-    } catch (err: any) {
-      throw err;
-    }
-
-    // Chain: auto-create transcribe task if requested
-    if (task.autoTranscribe && task.transcribeModelId) {
-      const subTask: QueueTask = {
-        id: `auto-transcribe-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        type: 'transcribe',
-        label: baseName,
-        status: 'queued',
-        percent: 0,
-        createdAt: Date.now(),
-        audioPath: outputPath,
-        modelId: task.transcribeModelId,
-        language: task.transcribeLanguage,
-      };
-      taskQueue.addTask(subTask);
-    }
+    await extractAudio(task.inputPath, outputPath, (progress) => {
+      task.percent = progress.percent;
+      if (win && !win.isDestroyed()) {
+        win.webContents.send(IPC.QUEUE_TASK_PROGRESS, {
+          taskId: task.id,
+          percent: progress.percent,
+          status: 'running',
+        });
+      }
+    }, task);
+    task.outputPath = outputPath;
   });
 
   ipcMain.handle(IPC.AUDIO_EXTRACT_START, async (_event, args: ExtractAudioArgs) => {
-    const outputDir = args.outputDir || (args.filePaths.length > 0 ? path.dirname(args.filePaths[0]) : '');
+    const allTasks: QueueTask[] = [];
 
-    const tasks: QueueTask[] = args.filePaths.map((filePath) => ({
-      id: `extract-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      type: 'extract' as const,
-      label: path.basename(filePath),
-      status: 'queued' as const,
-      percent: 0,
-      createdAt: Date.now(),
-      inputPath: filePath,
-      autoTranscribe: args.autoTranscribe,
-      transcribeModelId: args.transcribeModelId || 'small',
-      transcribeLanguage: args.transcribeLanguage || 'auto',
-    }));
+    for (const filePath of args.filePaths) {
+      const baseName = path.basename(filePath, path.extname(filePath));
 
-    taskQueue.addTasks(tasks);
-    return { success: true, taskCount: tasks.length };
+      const extractTask: QueueTask = {
+        id: `extract-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        type: 'extract',
+        label: path.basename(filePath),
+        status: 'queued',
+        percent: 0,
+        createdAt: Date.now(),
+        inputPath: filePath,
+      };
+      allTasks.push(extractTask);
+
+      // Add auto-transcribe task NOW, not inside the executor
+      if (args.autoTranscribe) {
+        const transcribeTask: QueueTask = {
+          id: `transcribe-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          type: 'transcribe',
+          label: `${baseName} → 转录`,
+          status: 'queued',
+          percent: 0,
+          createdAt: Date.now(),
+          audioPath: path.join(path.dirname(filePath), `${baseName}.wav`),
+          modelId: args.transcribeModelId || 'small',
+          language: args.transcribeLanguage || 'auto',
+        };
+        allTasks.push(transcribeTask);
+      }
+    }
+
+    taskQueue.addTasks(allTasks);
+    return { success: true, taskCount: allTasks.length };
   });
 }
