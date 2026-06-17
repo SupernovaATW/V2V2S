@@ -11,6 +11,7 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, 'src/shared'),
     },
   },
+  base: './',
   build: {
     outDir: path.resolve(__dirname, '.vite/renderer/main_window'),
     emptyOutDir: true,
