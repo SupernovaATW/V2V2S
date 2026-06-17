@@ -16,8 +16,7 @@ function createNoopAPI(): ElectronAPI {
     saveFileDialog: () => Promise.resolve({ cancelled: true, filePath: '' }),
     openDirDialog: () => Promise.resolve({ cancelled: true, filePaths: [] }),
     getTheme: () => Promise.resolve('dark'),
-    setTheme: noop,
-    updateTitleBar: noop,
+    setTheme: noop, updateTitleBar: noop,
     onQueueStateChanged: () => () => {},
     onQueueTaskProgress: () => () => {},
     onThemeChanged: () => () => {},
@@ -26,4 +25,5 @@ function createNoopAPI(): ElectronAPI {
   return api;
 }
 
-export const api: ElectronAPI = (window as any).electronAPI || createNoopAPI();
+const _api = (window as any).electronAPI || createNoopAPI();
+export const api: ElectronAPI = _api;
