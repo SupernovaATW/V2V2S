@@ -12,8 +12,21 @@ export function useTaskQueue() {
       setState(s);
     };
     load();
+
+    // Full state sync
     const unsub = api.onQueueStateChanged((s) => { setState(s); });
-    return () => { unsub(); };
+
+    // Live progress updates for individual tasks
+    const unsubProg = api.onQueueTaskProgress((p: any) => {
+      setState((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === p.taskId ? { ...t, percent: p.percent, status: p.status } : t
+        ),
+      }));
+    });
+
+    return () => { unsub(); unsubProg(); };
   }, []);
 
   const pause = useCallback(() => api.pauseQueue(), []);
