@@ -1,5 +1,6 @@
 import { spawn, execFile } from 'child_process';
 import { getFfmpegPath, getFfprobePath } from '../utils/paths';
+import { taskQueue } from './task-queue.service';
 
 export interface FFmpegProgress {
   percent: number;
@@ -29,7 +30,7 @@ export function extractAudio(
   inputPath: string,
   outputPath: string,
   onProgress: (progress: FFmpegProgress) => void,
-  task?: { cancelRequested?: boolean },
+  task?: any,
 ): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const ffmpeg = getFfmpegPath();
@@ -43,7 +44,7 @@ export function extractAudio(
     ];
 
     const proc = spawn(ffmpeg, args);
-    if (task) (task as any).__proc = proc;
+    if (task) taskQueue.setProc(task, proc);
     let duration = 0;
 
     try {

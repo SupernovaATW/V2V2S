@@ -10,6 +10,10 @@ export class TaskQueueService {
   private activeCount = 0;
   private listeners: Set<QueueListener> = new Set();
   private taskExecutors: Map<TaskType, TaskExecutor> = new Map();
+  private taskProcs: WeakMap<QueueTask, any> = new WeakMap();
+
+  setProc(task: any, proc: any) { this.taskProcs.set(task, proc); }
+  getProc(task: any): any { return this.taskProcs.get(task); }
 
   registerExecutor(type: TaskType, executor: TaskExecutor): void {
     this.taskExecutors.set(type, executor);
@@ -57,7 +61,7 @@ export class TaskQueueService {
     }
     // If running, kill the process and advance queue immediately
     if (task.status === 'running') {
-      const proc = (task as any).__proc;
+      const proc = this.taskProcs.get(task);
       if (proc && !proc.killed) {
         proc.kill('SIGKILL');
       }
@@ -97,8 +101,14 @@ export class TaskQueueService {
   }
 
   getState(): QueueState {
+    const clean = (task: QueueTask): QueueTask => {
+      const t: any = { ...task };
+      delete t.__proc;
+      if (t.childTasks) t.childTasks = t.childTasks.map(clean);
+      return t;
+    };
     return {
-      tasks: [...this.tasks],
+      tasks: this.tasks.map(clean),
       paused: this.paused,
       maxConcurrency: this.maxConcurrency,
     };
@@ -133,19 +143,19 @@ export class TaskQueueService {
 
     try {
       const executor = this.taskExecutors.get(task.type);
-      console.log(`[TaskQueue] Running: ${task.type} "${task.label}"`);
+      // console.log(`[TaskQueue]Running: ${task.type} "${task.label}"`);
       if (executor) {
         await executor(task);
       }
       task.status = 'completed';
       task.percent = 100;
-      console.log(`[TaskQueue] Done: ${task.type} "${task.label}"`);
+      // console.log(`[TaskQueue]Done: ${task.type} "${task.label}"`);
     } catch (err: any) {
-      console.log(`[TaskQueue] Failed: ${task.type} "${task.label}"`, err?.message || err);
+      // console.log(`[TaskQueue]Failed: ${task.type} "${task.label}"`, err?.message || err);
       task.status = 'failed';
       task.error = err?.message || String(err);
     } finally {
-      console.log(`[TaskQueue] Finally: ${task.type} "${task.label}" activeCount=${this.activeCount}`);
+      // console.log(`[TaskQueue]Finally: ${task.type} "${task.label}" activeCount=${this.activeCount}`);
       if (!this.isCancelled(task)) {
         this.activeCount--;
       }
