@@ -133,16 +133,19 @@ export class TaskQueueService {
 
     try {
       const executor = this.taskExecutors.get(task.type);
+      console.log(`[TaskQueue] Running: ${task.type} "${task.label}"`);
       if (executor) {
         await executor(task);
       }
       task.status = 'completed';
       task.percent = 100;
+      console.log(`[TaskQueue] Done: ${task.type} "${task.label}"`);
     } catch (err: any) {
-      console.error('[TaskQueue] Failed:', task.type, task.label, err?.message || err);
+      console.log(`[TaskQueue] Failed: ${task.type} "${task.label}"`, err?.message || err);
       task.status = 'failed';
       task.error = err?.message || String(err);
     } finally {
+      console.log(`[TaskQueue] Finally: ${task.type} "${task.label}" activeCount=${this.activeCount}`);
       if (!this.isCancelled(task)) {
         this.activeCount--;
       }
