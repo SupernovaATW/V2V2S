@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Upload, Plus, Play, Trash2, FileVideo, ArrowRight, FileJson, FileText } from 'lucide-react';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
-import { ProgressBar } from '../shared/ProgressBar';
-import { StatusBadge } from '../shared/StatusBadge';
 import { EmptyState } from '../shared/EmptyState';
 import { api } from '../../lib/ipc';
 import { formatDuration, formatFileSize } from '../../lib/formatters';
@@ -16,15 +14,10 @@ interface VideoFile {
   duration?: number;
 }
 
-interface ExtractionStatus {
-  [path: string]: { status: 'queued' | 'running' | 'completed' | 'failed'; percent: number };
-}
-
 export function AudioExtractionPanel({ modelId: defaultModelId }: { modelId: string }) {
   const { t, i18n } = useTranslation();
   const defaultLang = i18n.language.startsWith('zh') ? 'zh' : 'en';
   const [files, setFiles] = useState<VideoFile[]>([]);
-  const [statuses, setStatuses] = useState<ExtractionStatus>({});
   const [isDragging, setIsDragging] = useState(false);
   const [autoTranscribe, setAutoTranscribe] = useState(false);
   const [outputJson, setOutputJson] = useState(true);
@@ -65,9 +58,6 @@ export function AudioExtractionPanel({ modelId: defaultModelId }: { modelId: str
   const handleExtractAll = useCallback(async () => {
     if (files.length === 0) return;
     const paths = files.map((f) => f.path);
-    const newStatuses: ExtractionStatus = {};
-    paths.forEach((p) => { newStatuses[p] = { status: 'queued', percent: 0 }; });
-    setStatuses(newStatuses);
 
     await api.extractAudio({
       filePaths: paths,
@@ -77,12 +67,10 @@ export function AudioExtractionPanel({ modelId: defaultModelId }: { modelId: str
     });
     // Clear file list after queueing
     setFiles([]);
-    setStatuses({});
   }, [files, autoTranscribe, defaultModelId, transcribeLang]);
 
   const handleClear = useCallback(() => {
     setFiles([]);
-    setStatuses({});
   }, []);
 
   return (
@@ -158,26 +146,17 @@ export function AudioExtractionPanel({ modelId: defaultModelId }: { modelId: str
 
       {files.length > 0 && (
         <div className="mt-6 space-y-2">
-          {files.map((file) => {
-            const s = statuses[file.path];
-            return (
-              <Card key={file.path} className="flex items-center gap-3 py-3 px-4">
-                <FileVideo size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate text-[var(--text-primary)]">{file.name}</p>
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    {file.size > 0 ? formatFileSize(file.size) : ''}
-                  </p>
-                </div>
-                {s && (
-                  <div className="flex items-center gap-3">
-                    {s.status === 'running' && <ProgressBar percent={s.percent} className="w-24" />}
-                    <StatusBadge status={s.status} />
-                  </div>
-                )}
-              </Card>
-            );
-          })}
+          {files.map((file) => (
+            <Card key={file.path} className="flex items-center gap-3 py-3 px-4">
+              <FileVideo size={18} className="text-[var(--text-secondary)] shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm truncate text-[var(--text-primary)]">{file.name}</p>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  {file.size > 0 ? formatFileSize(file.size) : ''}
+                </p>
+              </div>
+            </Card>
+          ))}
         </div>
       )}
 

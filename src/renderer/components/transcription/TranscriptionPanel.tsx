@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Mic, Copy, Save, FileAudio, Play, Plus, FileJson, FileText } from 'lucide-react';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
-import { ProgressBar } from '../shared/ProgressBar';
 import { EmptyState } from '../shared/EmptyState';
 import { api } from '../../lib/ipc';
 
@@ -16,7 +15,6 @@ export function TranscriptionPanel({ modelId }: { modelId: string }) {
   const [result, setResult] = useState<{ json: any; srt: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'json' | 'srt'>('json');
   const [transcribing, setTranscribing] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [outputJson, setOutputJson] = useState(true);
   const [outputSrt, setOutputSrt] = useState(true);
 
@@ -35,20 +33,15 @@ export function TranscriptionPanel({ modelId }: { modelId: string }) {
   const handleTranscribe = useCallback(async () => {
     if (!audioPath) return;
     setTranscribing(true);
-    setProgress(0);
     setResult(null);
 
     const res = await api.transcribe({ audioPath, modelId: modelId, language });
     const taskId = (res as any).taskId;
 
-    const unsubProg = api.onQueueTaskProgress((p: any) => {
-      if (p.taskId === taskId) setProgress(p.percent);
-    });
     const unsubState = api.onQueueStateChanged((state: any) => {
       const t = state.tasks.find((t: any) => t.id === taskId);
       if (!t || t.status === 'completed' || t.status === 'failed' || t.status === 'cancelled') {
         setTranscribing(false);
-        unsubProg();
         unsubState();
       }
     });
@@ -164,14 +157,6 @@ export function TranscriptionPanel({ modelId }: { modelId: string }) {
           <Plus size={16} /> {t('audioToSub.addToQueue')}
         </Button>
       </div>
-
-      {/* Progress */}
-      {transcribing && (
-        <div className="mb-6">
-          <ProgressBar percent={progress} />
-          <p className="text-xs text-[var(--text-secondary)] mt-1">{progress}%</p>
-        </div>
-      )}
 
       {/* Result */}
       {result ? (
