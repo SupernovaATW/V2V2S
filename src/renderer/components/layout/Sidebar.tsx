@@ -89,7 +89,7 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
           >
             <span className="flex items-center gap-2">
               <Download size={14} className="opacity-70" />
-              {selected?.name || 'Small'}
+              Model
             </span>
             <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
