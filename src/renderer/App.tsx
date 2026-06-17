@@ -14,16 +14,6 @@ export default function App() {
   const [activePage, setActivePage] = useState('extract');
   const [selectedModel, setSelectedModel] = useState('small');
 
-  const renderPage = () => {
-    switch (activePage) {
-      case 'extract':      return <AudioExtractionPanel key="extract" modelId={selectedModel} />;
-      case 'audioToSub':   return <TranscriptionPanel key="audioToSub" modelId={selectedModel} />;
-      case 'videoToSub':   return <VideoToSubPanel key="videoToSub" modelId={selectedModel} />;
-      case 'queue':        return <QueuePanel key="queue" />;
-      default:             return <AudioExtractionPanel key="extract" modelId={selectedModel} />;
-    }
-  };
-
   return (
     <div className="h-full flex flex-col bg-[var(--bg-primary)]">
       <div className="h-10 bg-[var(--bg-sidebar)] flex items-center justify-center gap-2 titlebar-drag shrink-0">
@@ -41,7 +31,18 @@ export default function App() {
           onModelChange={setSelectedModel}
         />
         <main className="flex-1 overflow-hidden bg-[var(--bg-primary)]">
-          {renderPage()}
+          <div className={activePage === 'extract' ? '' : 'hidden'}>
+            <AudioExtractionPanel modelId={selectedModel} />
+          </div>
+          <div className={activePage === 'audioToSub' ? '' : 'hidden'}>
+            <TranscriptionPanel modelId={selectedModel} />
+          </div>
+          <div className={activePage === 'videoToSub' ? '' : 'hidden'}>
+            <VideoToSubPanel modelId={selectedModel} />
+          </div>
+          <div className={activePage === 'queue' ? '' : 'hidden'}>
+            <QueuePanel />
+          </div>
         </main>
       </div>
     </div>
