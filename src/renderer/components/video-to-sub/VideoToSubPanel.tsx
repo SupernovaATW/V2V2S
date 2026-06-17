@@ -70,6 +70,8 @@ export function VideoToSubPanel({ modelId }: { modelId: string }) {
       modelId: modelId,
       language,
     });
+    setFiles([]);
+    setIsProcessing(false);
   }, [files, modelId, language]);
 
   const handleClear = useCallback(() => {

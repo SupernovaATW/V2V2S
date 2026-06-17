@@ -75,7 +75,10 @@ export function AudioExtractionPanel({ modelId: defaultModelId }: { modelId: str
       transcribeModelId: defaultModelId,
       transcribeLanguage: transcribeLang,
     });
-  }, [files, autoTranscribe]);
+    // Clear file list after queueing
+    setFiles([]);
+    setStatuses({});
+  }, [files, autoTranscribe, defaultModelId, transcribeLang]);
 
   const handleClear = useCallback(() => {
     setFiles([]);
