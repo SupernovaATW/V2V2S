@@ -10,6 +10,7 @@ export async function transcribe(
   outputDir: string,
   language: string,
   onProgress: (percent: number) => void,
+  task?: { cancelRequested?: boolean },
 ): Promise<{ json: TranscriptionOutput; srt: string }> {
   return new Promise((resolve, reject) => {
     const whisperCli = getWhisperCliPath();
@@ -44,8 +45,10 @@ export async function transcribe(
     }
 
     const proc = spawn(whisperCli, args);
+    if (task) (task as any).__proc = proc;
 
     const parseProgress = (data: string) => {
+      if (task?.cancelRequested) { proc.kill('SIGKILL'); reject(new Error('Cancelled')); return; }
       // whisper.cpp progress: "progress = NN%" or "[INFO ] progress = NN%"
       const match = data.match(/progress\s*[=:]\s*(\d+)\s*%/);
       if (match) {

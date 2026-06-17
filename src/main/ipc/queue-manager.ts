@@ -36,4 +36,8 @@ export function registerQueueHandlers(getMainWindow: () => BrowserWindow | null)
   ipcMain.handle(IPC.QUEUE_RETRY_TASK, async (_event, taskId: string) => {
     return { success: taskQueue.retryTask(taskId) };
   });
+
+  ipcMain.handle(IPC.QUEUE_CANCEL_TASK, async (_event, taskId: string) => {
+    return { success: taskQueue.cancelTask(taskId) };
+  });
 }

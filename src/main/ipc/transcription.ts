@@ -29,6 +29,7 @@ export function registerTranscriptionHandlers(getMainWindow: () => BrowserWindow
           });
         }
       },
+      task,
     );
 
     // Read the output files
@@ -85,7 +86,7 @@ export function registerTranscriptionHandlers(getMainWindow: () => BrowserWindow
 
     await extractAudio(task.inputPath, wavPath, (progress) => {
       childExtract.percent = progress.percent;
-      task.percent = Math.round(progress.percent * 0.4); // extract is 40% of total
+      task.percent = Math.round(progress.percent * 0.4);
       if (win()) {
         win()!.webContents.send(IPC.QUEUE_TASK_PROGRESS, {
           taskId: task.id,
@@ -93,7 +94,7 @@ export function registerTranscriptionHandlers(getMainWindow: () => BrowserWindow
           status: 'running',
         });
       }
-    });
+    }, task);
 
     childExtract.status = 'completed';
     childExtract.percent = 100;
@@ -109,7 +110,7 @@ export function registerTranscriptionHandlers(getMainWindow: () => BrowserWindow
       task.language || 'auto',
       (percent) => {
         childTranscribe.percent = percent;
-        task.percent = 40 + Math.round(percent * 0.6); // transcribe is 60% of total
+        task.percent = 40 + Math.round(percent * 0.6);
         if (win()) {
           win()!.webContents.send(IPC.QUEUE_TASK_PROGRESS, {
             taskId: task.id,
@@ -118,6 +119,7 @@ export function registerTranscriptionHandlers(getMainWindow: () => BrowserWindow
           });
         }
       },
+      task,
     );
 
     childTranscribe.status = 'completed';

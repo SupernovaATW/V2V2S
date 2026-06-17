@@ -8,7 +8,7 @@ function createNoopAPI(): ElectronAPI {
     downloadModel: noop, cancelDownload: noop,
     getQueueState: () => Promise.resolve({ tasks: [], paused: false, maxConcurrency: 1 }),
     addQueueTask: noop, removeQueueTask: noop,
-    pauseQueue: noop, resumeQueue: noop, retryQueueTask: noop,
+    pauseQueue: noop, resumeQueue: noop, retryQueueTask: noop, cancelTask: noop,
     listFiles: () => Promise.resolve([]),
     deleteFile: noop, openFolder: noop, writeFile: noop, readFile: noop,
     minimizeWindow: noop, maximizeWindow: noop, closeWindow: noop,

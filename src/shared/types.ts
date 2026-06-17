@@ -89,6 +89,8 @@ export interface QueueTask {
   srtResult?: string;
   // video-to-sub: internal sub-tasks
   childTasks?: QueueTask[];
+  // cancel
+  cancelRequested?: boolean;
 }
 
 export interface QueueState {

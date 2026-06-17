@@ -16,6 +16,7 @@ export function useTaskQueue() {
   const resume = useCallback(() => api.resumeQueue(), []);
   const removeTask = useCallback((id: string) => api.removeQueueTask(id), []);
   const retryTask = useCallback((id: string) => api.retryQueueTask(id), []);
+  const cancelTask = useCallback((id: string) => api.cancelTask(id), []);
 
-  return { state, pause, resume, removeTask, retryTask };
+  return { state, pause, resume, removeTask, retryTask, cancelTask };
 }

@@ -42,6 +42,31 @@ export class TaskQueueService {
     return true;
   }
 
+  cancelTask(taskId: string): boolean {
+    const task = this.tasks.find((t) => t.id === taskId);
+    if (!task) return false;
+    if (task.status === 'completed' || task.status === 'cancelled') return false;
+    task.cancelRequested = true;
+    // If still queued, cancel immediately
+    if (task.status === 'queued') {
+      task.status = 'cancelled';
+      this.tasks = this.tasks.filter((t) => t.id !== taskId);
+      this.emit();
+      this.processNext();
+      return true;
+    }
+    // If running, the executor will check cancelRequested and kill the process
+    if (task.status === 'running') {
+      const proc = (task as any).__proc;
+      if (proc && !proc.killed) {
+        proc.kill('SIGTERM');
+        setTimeout(() => { if (!proc.killed) proc.kill('SIGKILL'); }, 2000);
+      }
+    }
+    this.emit();
+    return true;
+  }
+
   pause(): void {
     this.paused = true;
     this.emit();

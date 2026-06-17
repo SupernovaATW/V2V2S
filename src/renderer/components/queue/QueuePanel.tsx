@@ -16,7 +16,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 
 export function QueuePanel() {
   const { t } = useTranslation();
-  const { state, pause, resume, removeTask, retryTask } = useTaskQueue();
+  const { state, pause, resume, removeTask, retryTask, cancelTask } = useTaskQueue();
 
   const hasActive = state.tasks.some((t) => t.status === 'running');
   const taskTypeLabel = (type: string) => {
@@ -102,6 +102,11 @@ export function QueuePanel() {
                   {task.status === 'failed' && (
                     <Button variant="ghost" size="sm" onClick={() => retryTask(task.id)}>
                       <RotateCcw size={14} />
+                    </Button>
+                  )}
+                  {task.status === 'running' && (
+                    <Button variant="danger" size="sm" onClick={() => cancelTask(task.id)}>
+                      <X size={14} />
                     </Button>
                   )}
                   {(task.status === 'queued' || task.status === 'failed' || task.status === 'completed') && (

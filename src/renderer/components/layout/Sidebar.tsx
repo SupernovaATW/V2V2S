@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Music, Mic, Clapperboard, ListChecks, Sun, Moon, Languages, Download, ChevronDown, Check } from 'lucide-react';
 import { useModelManager } from '../../hooks/useModelManager';
+import { useTaskQueue } from '../../hooks/useTaskQueue';
 import { formatFileSize } from '../../lib/formatters';
 
 interface SidebarProps {
@@ -18,6 +19,8 @@ const btnClass = "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs fo
 export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, selectedModel, onModelChange }: SidebarProps) {
   const { t, i18n } = useTranslation();
   const { models, download } = useModelManager();
+  const { state: queueState } = useTaskQueue();
+  const activeCount = queueState.tasks.filter(t => t.status === 'running' || t.status === 'queued').length;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +44,7 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
     { id: 'extract', icon: Music, label: t('nav.extract') },
     { id: 'audioToSub', icon: Mic, label: t('nav.audioToSub') },
     { id: 'videoToSub', icon: Clapperboard, label: t('nav.videoToSub') },
-    { id: 'queue', icon: ListChecks, label: t('nav.queue') },
+    { id: 'queue', icon: ListChecks, label: t('nav.queue'), badge: activeCount },
   ];
 
   const toggleLanguage = () => {
@@ -71,7 +74,12 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
               }`}
             >
               <Icon size={18} />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {(item as any).badge > 0 && (
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[10px] font-bold">
+                  {(item as any).badge}
+                </span>
+              )}
             </button>
           );
         })}

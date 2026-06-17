@@ -23,7 +23,7 @@ export function registerAudioExtractionHandlers(getMainWindow: () => BrowserWind
             status: 'running',
           });
         }
-      });
+      }, task);
       task.outputPath = outputPath;
     } catch (err: any) {
       throw err;

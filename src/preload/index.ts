@@ -26,6 +26,7 @@ const electronAPI = {
   pauseQueue: () => ipcRenderer.invoke(IPC.QUEUE_PAUSE),
   resumeQueue: () => ipcRenderer.invoke(IPC.QUEUE_RESUME),
   retryQueueTask: (taskId: string) => ipcRenderer.invoke(IPC.QUEUE_RETRY_TASK, taskId),
+  cancelTask: (taskId: string) => ipcRenderer.invoke(IPC.QUEUE_CANCEL_TASK, taskId),
 
   // File Management
   listFiles: (dirPath: string, filter?: string) => ipcRenderer.invoke(IPC.FILES_LIST, dirPath, filter),

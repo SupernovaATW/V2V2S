@@ -24,6 +24,7 @@ export const IPC = {
   QUEUE_PAUSE: 'queue:pause',
   QUEUE_RESUME: 'queue:resume',
   QUEUE_RETRY_TASK: 'queue:retry-task',
+  QUEUE_CANCEL_TASK: 'queue:cancel-task',
   QUEUE_GET_STATE: 'queue:get-state',
   QUEUE_TASK_PROGRESS: 'queue:task-progress',
   QUEUE_TASK_COMPLETED: 'queue:task-completed',

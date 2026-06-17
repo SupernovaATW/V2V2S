@@ -29,6 +29,7 @@ export function extractAudio(
   inputPath: string,
   outputPath: string,
   onProgress: (progress: FFmpegProgress) => void,
+  task?: { cancelRequested?: boolean },
 ): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const ffmpeg = getFfmpegPath();
@@ -42,6 +43,7 @@ export function extractAudio(
     ];
 
     const proc = spawn(ffmpeg, args);
+    if (task) (task as any).__proc = proc;
     let duration = 0;
 
     try {
@@ -51,6 +53,7 @@ export function extractAudio(
     }
 
     proc.stderr.on('data', (data: Buffer) => {
+      if (task?.cancelRequested) { proc.kill('SIGKILL'); reject(new Error('Cancelled')); return; }
       const output = data.toString();
       const timeMatch = output.match(/time=(\d+):(\d+):(\d+\.\d+)/);
       if (timeMatch && duration > 0) {
