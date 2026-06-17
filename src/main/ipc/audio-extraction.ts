@@ -13,8 +13,6 @@ export function registerAudioExtractionHandlers(getMainWindow: () => BrowserWind
     const baseName = path.basename(task.inputPath, path.extname(task.inputPath));
     const outputPath = path.join(outputDir, `${baseName}.wav`);
 
-    console.log('[extract] Starting:', task.inputPath, '->', outputPath);
-
     try {
       await extractAudio(task.inputPath, outputPath, (progress) => {
         task.percent = progress.percent;
@@ -26,10 +24,8 @@ export function registerAudioExtractionHandlers(getMainWindow: () => BrowserWind
           });
         }
       });
-      console.log('[extract] Done:', outputPath);
       task.outputPath = outputPath;
     } catch (err: any) {
-      console.error('[extract] Failed:', err.message);
       throw err;
     }
 

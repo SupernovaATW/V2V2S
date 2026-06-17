@@ -32,7 +32,6 @@ export function extractAudio(
 ): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const ffmpeg = getFfmpegPath();
-    console.log('[FFmpeg] path:', ffmpeg, 'input:', inputPath);
 
     const args = [
       '-i', inputPath,

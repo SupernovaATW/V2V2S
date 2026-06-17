@@ -5,15 +5,13 @@ import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
 import { ProgressBar } from '../shared/ProgressBar';
 import { EmptyState } from '../shared/EmptyState';
-import { ModelSelector } from './ModelSelector';
 import { api } from '../../lib/ipc';
 
-export function TranscriptionPanel() {
+export function TranscriptionPanel({ modelId }: { modelId: string }) {
   const { t, i18n } = useTranslation();
   const defaultLang = i18n.language.startsWith('zh') ? 'zh' : 'en';
   const [audioPath, setAudioPath] = useState<string | null>(null);
   const [audioName, setAudioName] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState('small');
   const [language, setLanguage] = useState(defaultLang);
   const [result, setResult] = useState<{ json: any; srt: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'json' | 'srt'>('json');
@@ -40,7 +38,7 @@ export function TranscriptionPanel() {
     setProgress(0);
     setResult(null);
 
-    await api.transcribe({ audioPath, modelId: selectedModel, language });
+    await api.transcribe({ audioPath, modelId: modelId, language });
 
     const unsubProg = api.onQueueTaskProgress((p: any) => setProgress(p.percent));
     const unsubState = api.onQueueStateChanged((state: any) => {
@@ -51,18 +49,18 @@ export function TranscriptionPanel() {
         unsubState();
       }
     });
-  }, [audioPath, selectedModel, language]);
+  }, [audioPath, modelId, language]);
 
   const handleAddToQueue = useCallback(async () => {
     if (!audioPath) return;
     await api.addQueueTask({
       type: 'transcribe',
       audioPath,
-      modelId: selectedModel,
+      modelId: modelId,
       language,
       label: audioName,
     });
-  }, [audioPath, selectedModel, language, audioName]);
+  }, [audioPath, modelId, language, audioName]);
 
   const handleCopyJson = useCallback(() => {
     if (result?.json) navigator.clipboard.writeText(JSON.stringify(result.json, null, 2));
@@ -116,12 +114,6 @@ export function TranscriptionPanel() {
             <span className="text-xs text-[var(--text-secondary)]">{t('audioToSub.labelSrt')}</span>
           </label>
         </div>
-      </div>
-
-      {/* Model selection */}
-      <div className="mb-6">
-        <p className="text-sm text-[var(--text-secondary)] mb-3">{t('audioToSub.selectModel')}</p>
-        <ModelSelector selected={selectedModel} onSelect={setSelectedModel} />
       </div>
 
       {/* Audio source */}

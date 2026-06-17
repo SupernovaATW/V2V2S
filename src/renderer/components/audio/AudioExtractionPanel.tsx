@@ -20,7 +20,7 @@ interface ExtractionStatus {
   [path: string]: { status: 'queued' | 'running' | 'completed' | 'failed'; percent: number };
 }
 
-export function AudioExtractionPanel() {
+export function AudioExtractionPanel({ modelId: defaultModelId }: { modelId: string }) {
   const { t, i18n } = useTranslation();
   const defaultLang = i18n.language.startsWith('zh') ? 'zh' : 'en';
   const [files, setFiles] = useState<VideoFile[]>([]);
@@ -72,7 +72,7 @@ export function AudioExtractionPanel() {
     await api.extractAudio({
       filePaths: paths,
       autoTranscribe,
-      transcribeModelId: 'small',
+      transcribeModelId: defaultModelId,
       transcribeLanguage: transcribeLang,
     });
   }, [files, autoTranscribe]);
