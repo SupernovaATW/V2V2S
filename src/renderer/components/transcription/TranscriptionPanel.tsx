@@ -38,12 +38,15 @@ export function TranscriptionPanel({ modelId }: { modelId: string }) {
     setProgress(0);
     setResult(null);
 
-    await api.transcribe({ audioPath, modelId: modelId, language });
+    const res = await api.transcribe({ audioPath, modelId: modelId, language });
+    const taskId = (res as any).taskId;
 
-    const unsubProg = api.onQueueTaskProgress((p: any) => setProgress(p.percent));
+    const unsubProg = api.onQueueTaskProgress((p: any) => {
+      if (p.taskId === taskId) setProgress(p.percent);
+    });
     const unsubState = api.onQueueStateChanged((state: any) => {
-      const done = state.tasks.filter((t: any) => t.status === 'completed' || t.status === 'failed');
-      if (done.length === state.tasks.length && state.tasks.length > 0) {
+      const t = state.tasks.find((t: any) => t.id === taskId);
+      if (!t || t.status === 'completed' || t.status === 'failed' || t.status === 'cancelled') {
         setTranscribing(false);
         unsubProg();
         unsubState();
