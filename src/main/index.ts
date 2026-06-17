@@ -20,11 +20,9 @@ function createWindow(): void {
   // Resolve preload path - try multiple locations
   let preloadPath = path.join(__dirname, '..', 'preload', 'index.js');
   if (!fs.existsSync(preloadPath)) {
-    // Fallback: try adjacent to main build output
     preloadPath = path.join(__dirname, 'preload', 'index.js');
   }
   if (!fs.existsSync(preloadPath)) {
-    // Fallback: try .vite/preload
     preloadPath = path.join(__dirname, '..', '..', '.vite', 'preload', 'index.js');
   }
   console.log('Preload path:', preloadPath, 'exists:', fs.existsSync(preloadPath));
@@ -60,7 +58,7 @@ function createWindow(): void {
   });
 
   // Load the renderer
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+  if (typeof MAIN_WINDOW_VITE_DEV_SERVER_URL === 'string') {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     mainWindow.loadFile(

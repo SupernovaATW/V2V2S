@@ -6,7 +6,7 @@
   "main": ".vite/build/index.js",
   "scripts": {
     "start": "electron-forge start",
-    "build": "npx vite build --config vite.renderer.config.ts",
+    "build": "npx vite build --config vite.main.config.ts && npx vite build --config vite.preload.config.ts && npx vite build --config vite.renderer.config.ts",
     "dist": "npm run build && electron-builder --win"
   },
   "build": {

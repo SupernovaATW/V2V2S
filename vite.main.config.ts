@@ -10,7 +10,7 @@ export default defineConfig({
   },
   build: {
     outDir: '.vite/build',
-    emptyOutDir: true,
+    emptyOutDir: false,
     lib: {
       entry: path.resolve(__dirname, 'src/main/index.ts'),
       formats: ['cjs'],

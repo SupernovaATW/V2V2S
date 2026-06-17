@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Music, Mic, Clapperboard, ListChecks, Sun, Moon, Languages } from 'lucide-react';
+import { Music, Mic, Clapperboard, ListChecks, Sun, Moon, Languages, Download, ChevronDown, Check } from 'lucide-react';
 import { useModelManager } from '../../hooks/useModelManager';
 import { formatFileSize } from '../../lib/formatters';
 
@@ -13,13 +13,32 @@ interface SidebarProps {
   onModelChange: (modelId: string) => void;
 }
 
+const btnClass = "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]";
+
 export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, selectedModel, onModelChange }: SidebarProps) {
   const { t, i18n } = useTranslation();
-  const { models } = useModelManager();
+  const { models, download } = useModelManager();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const displayModels = models.length > 0
     ? models
     : [{ id: 'small', name: 'Small', sizeBytes: 466_000_000, bundled: true, downloaded: true, multilingual: true, filename: 'ggml-small.bin', url: '' }];
+
+  const selected = displayModels.find((m) => m.id === selectedModel);
+  const canDownload = selected && !selected.downloaded && !selected.bundled;
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [dropdownOpen]);
 
   const navItems = [
     { id: 'extract', icon: Music, label: t('nav.extract') },
@@ -48,10 +67,10 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
             <button
               key={item.id}
               onClick={() => onPageChange(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`${btnClass} ${
                 isActive
                   ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
+                  : ''
               }`}
             >
               <Icon size={18} />
@@ -61,40 +80,66 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
         })}
       </nav>
 
-      <div className="px-5 py-4 border-t border-[var(--border)] space-y-3">
-        {/* Model selector */}
-        <div>
-          <select
-            value={selectedModel}
-            onChange={(e) => onModelChange(e.target.value)}
-            className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-primary)] appearance-none cursor-pointer"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23a09d96' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 8px center',
-              paddingRight: '24px',
-            }}
+      <div className="px-3 py-3 border-t border-[var(--border)] space-y-1.5">
+        {/* Custom Model Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            className={`${btnClass} justify-between w-full`}
+            onClick={() => setDropdownOpen(!dropdownOpen)}
           >
-            {displayModels.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} ({formatFileSize(m.sizeBytes)}){m.bundled ? ' ✓' : ''}
-              </option>
-            ))}
-          </select>
+            <span className="flex items-center gap-2">
+              <Download size={14} className="opacity-70" />
+              {selected?.name || 'Small'}
+            </span>
+            <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {dropdownOpen && (
+            <div className="absolute left-0 right-0 bottom-full mb-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50 animate-fade-in">
+              {displayModels.map((m) => {
+                const isSel = selectedModel === m.id;
+                const downloaded = m.downloaded || m.bundled;
+                return (
+                  <button
+                    key={m.id}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors ${
+                      isSel
+                        ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                    }`}
+                    onClick={() => {
+                      onModelChange(m.id);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    <span>{m.name}</span>
+                    <span className="text-[var(--text-secondary)] text-[10px] ml-2">{formatFileSize(m.sizeBytes)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-        >
+        {/* Download button */}
+        {canDownload && (
+          <button
+            className={`${btnClass} !text-[var(--accent)] hover:!text-[var(--accent-hover)]`}
+            onClick={() => download(selectedModel)}
+          >
+            <Download size={14} />
+            {t('model.modelDownload')}
+          </button>
+        )}
+
+        {/* Language toggle */}
+        <button onClick={toggleLanguage} className={btnClass}>
           <Languages size={14} />
           {i18n.language === 'zh-CN' ? 'English' : '中文'}
         </button>
 
-        <button
-          className="flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          onClick={onToggleTheme}
-        >
+        {/* Theme toggle */}
+        <button onClick={onToggleTheme} className={btnClass}>
           {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} />}
           {theme === 'dark' ? 'Dark' : 'Light'}
         </button>
