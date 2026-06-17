@@ -55,22 +55,23 @@ export class TaskQueueService {
       this.processNext();
       return true;
     }
-    // If running, kill the process — the executor's catch will set status to 'failed'
+    // If running, kill the process and advance queue immediately
     if (task.status === 'running') {
       const proc = (task as any).__proc;
       if (proc && !proc.killed) {
         proc.kill('SIGKILL');
-        // Force status update immediately so frontend shows the change
-        task.status = 'cancelled';
-        this.tasks = this.tasks.filter((t) => t.id !== taskId);
-      } else {
-        // No process reference, mark as cancelled
-        task.status = 'cancelled';
-        this.tasks = this.tasks.filter((t) => t.id !== taskId);
       }
+      task.status = 'cancelled';
+      this.tasks = this.tasks.filter((t) => t.id !== taskId);
+      this.activeCount--;
+      this.processNext();
     }
     this.emit();
     return true;
+  }
+
+  private isCancelled(task: QueueTask): boolean {
+    return !this.tasks.includes(task);
   }
 
   pause(): void {
@@ -142,9 +143,13 @@ export class TaskQueueService {
       task.status = 'failed';
       task.error = err?.message || String(err);
     } finally {
-      this.activeCount--;
+      if (!this.isCancelled(task)) {
+        this.activeCount--;
+      }
       this.emit();
-      this.processNext();
+      if (!this.isCancelled(task)) {
+        this.processNext();
+      }
     }
   }
 }
