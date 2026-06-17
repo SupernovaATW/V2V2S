@@ -1,38 +1,40 @@
+[中文版本](#v2v2s----视频转音频--音频转字幕)
+
 # V2V2S — Video to Audio to Subtitles
 
-视频转音频 · 音频转字幕。一站式桌面工具，从视频中提取音频，并将音频识别为字幕。
+A one-stop desktop tool: extract audio from video, transcribe audio to subtitles.
 
-## 功能
+## Features
 
-| 功能 | 说明 |
-|------|------|
-| 🎬 **视频转音频** | 从视频中提取音频轨道，保持原始采样率和声道，支持批量队列处理 |
-| 🎵 **音频转字幕** | 将音频识别为字幕，同时输出 JSON（AI 格式，含毫秒时间戳）和 SRT（标准字幕） |
-| 🎥 **视频转字幕** | 视频直接生成字幕，自动完成提取音频 → 语音识别，一步到位 |
+| Function | Description |
+|----------|-------------|
+| 🎬 **Video to Audio** | Extract audio tracks from video files, preserving original quality. Batch processing with queue. |
+| 🎵 **Audio to Subtitles** | Transcribe audio using whisper.cpp. Outputs both JSON (AI-friendly, with millisecond timestamps) and SRT (standard subtitles). |
+| 🎥 **Video to Subtitles** | Direct video-to-subtitle conversion. Extracts audio then transcribes automatically, without leaving intermediate files. |
 
-## 特性
+## Highlights
 
-- 暗色/浅色主题跟随系统自动切换，支持手动切换
-- 中英文双语界面
-- Smart 模型内置 (~466MB)，Medium / Large v3 可选下载
-- 所有任务统一管理，支持暂停/恢复/取消/重试
-- 提取后可自动链式转录，省去手动步骤
-- whisper.cpp 本地推理，无需联网
+- 🌓 Dark/light theme follows system, with manual toggle
+- 🌐 Bilingual UI: English / 简体中文
+- 🧠 **Small** model built-in (~466 MB). Medium & Large v3 available for download
+- 📋 Unified task queue: pause, cancel, retry. Progress bars for all operations
+- 🔗 Auto-transcribe: extract audio and transcribe in one go
+- 🖥️ whisper.cpp runs locally, no internet required for inference
 
-## 安装
+## Install
 
-从 [Releases](../../releases) 下载 `V2V2S Setup x.x.x.exe`，双击安装。
+Download `V2V2S Setup x.x.x.exe` from [Releases](../../releases) and run the installer.
 
-## 开发环境
+## Dev
 
-### 前提条件
+### Prerequisites
 
 - Node.js ≥ 20
 - npm ≥ 10
 
-### 获取二进制依赖
+### Setup
 
-运行前需要准备 FFmpeg 和 whisper.cpp Windows 可执行文件：
+Place FFmpeg and whisper.cpp Windows binaries under `resources/`:
 
 ```
 resources/
@@ -45,36 +47,75 @@ resources/
     └── *.dll
 ```
 
-以及 Whisper 模型：
+Place a whisper model in `models/`:
 
 ```
 models/
-└── ggml-small.bin      # 内置模型 (~466MB)
+└── ggml-small.bin    # bundled model (~466 MB)
 ```
 
-模型可从 [HuggingFace](https://huggingface.co/ggerganov/whisper.cpp) 下载。
+Models can be downloaded from [HuggingFace](https://huggingface.co/ggerganov/whisper.cpp).
 
-### 开发
+### Start
 
 ```bash
 npm install
 npm start
 ```
 
-### 打包
+### Build
 
 ```bash
 npm run dist
 ```
 
-打包产物在 `dist/` 目录。
+Output: `dist/V2V2S Setup 1.0.0.exe`
+
+## Tech
+
+- **Framework**: Electron + React + TypeScript
+- **Styling**: Tailwind CSS
+- **i18n**: i18next
+- **Audio**: FFmpeg
+- **ASR**: whisper.cpp + ggml-small.bin
+
+## License
+
+MIT
+
+---
+
+# V2V2S — 视频转音频 · 音频转字幕
+
+一站式桌面工具：从视频提取音频，将音频识别为字幕。
+
+## 功能
+
+| 功能 | 说明 |
+|------|------|
+| 🎬 **视频转音频** | 从视频提取音频轨道，保持原始质量，支持批量队列 |
+| 🎵 **音频转字幕** | whisper.cpp 本地识别，同时输出 JSON（AI 友好，毫秒级时间戳）和 SRT（标准字幕） |
+| 🎥 **视频转字幕** | 视频直接转字幕，自动提取→识别，不留中间文件 |
+
+## 亮点
+
+- 🌓 深色/浅色主题跟随系统，可手动切换
+- 🌐 中英双语界面
+- 🧠 内置 **Small** 模型 (~466 MB)，Medium / Large v3 可选下载
+- 📋 统一任务队列：暂停、取消、重试，所有操作带进度条
+- 🔗 链式转录：提取音频后可自动转字幕
+- 🖥️ whisper.cpp 本地推理，无需联网
+
+## 安装
+
+从 [Releases](../../releases) 下载 `V2V2S Setup x.x.x.exe`，双击安装。
 
 ## 技术栈
 
 - **框架**: Electron + React + TypeScript
 - **样式**: Tailwind CSS
 - **国际化**: i18next
-- **音频提取**: FFmpeg
+- **音频**: FFmpeg
 - **语音识别**: whisper.cpp + ggml-small.bin
 
 ## License
