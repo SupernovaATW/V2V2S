@@ -25,9 +25,6 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
     ? models
     : [{ id: 'small', name: 'Small', sizeBytes: 466_000_000, bundled: true, downloaded: true, multilingual: true, filename: 'ggml-small.bin', url: '' }];
 
-  const selected = displayModels.find((m) => m.id === selectedModel);
-  const canDownload = selected && !selected.downloaded && !selected.bundled;
-
   // Close dropdown on outside click
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -98,39 +95,39 @@ export function Sidebar({ activePage, onPageChange, theme, onToggleTheme, select
             <div className="absolute left-0 right-0 bottom-full mb-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50 animate-fade-in">
               {displayModels.map((m) => {
                 const isSel = selectedModel === m.id;
-                const downloaded = m.downloaded || m.bundled;
+                const isDownloaded = m.downloaded || m.bundled;
                 return (
                   <button
                     key={m.id}
                     className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors ${
                       isSel
                         ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                        : isDownloaded
+                        ? 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                        : 'text-[var(--accent)] hover:bg-[var(--bg-hover)]'
                     }`}
                     onClick={() => {
-                      onModelChange(m.id);
-                      setDropdownOpen(false);
+                      if (isDownloaded) {
+                        onModelChange(m.id);
+                        setDropdownOpen(false);
+                      } else {
+                        download(m.id);
+                      }
                     }}
                   >
-                    <span>{m.name}</span>
-                    <span className="text-[var(--text-secondary)] text-[10px] ml-2">{formatFileSize(m.sizeBytes)}</span>
+                    <span className="flex items-center gap-1">
+                      {m.name}
+                      {isSel && <Check size={10} className="text-[var(--accent)]" />}
+                    </span>
+                    <span className="text-[var(--text-secondary)] text-[10px] ml-2">
+                      {isDownloaded ? formatFileSize(m.sizeBytes) : `⬇ ${formatFileSize(m.sizeBytes)}`}
+                    </span>
                   </button>
                 );
               })}
             </div>
           )}
         </div>
-
-        {/* Download button */}
-        {canDownload && (
-          <button
-            className={`${btnClass} !text-[var(--accent)] hover:!text-[var(--accent-hover)]`}
-            onClick={() => download(selectedModel)}
-          >
-            <Download size={14} />
-            {t('model.modelDownload')}
-          </button>
-        )}
 
         {/* Language toggle */}
         <button onClick={toggleLanguage} className={btnClass}>
