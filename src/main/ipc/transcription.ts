@@ -137,6 +137,10 @@ export function registerTranscriptionHandlers(getMainWindow: () => BrowserWindow
       if (fs.existsSync(srtPath)) {
         task.srtResult = fs.readFileSync(srtPath, 'utf-8');
       }
+      // Clean up temporary WAV file
+      if (fs.existsSync(wavPath)) {
+        fs.unlinkSync(wavPath);
+      }
     } catch { /* ignore */ }
   });
 
