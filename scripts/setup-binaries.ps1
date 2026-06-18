@@ -79,15 +79,15 @@ if (-not (Test-Path "$whisperDir\whisper-cli.exe")) {
     Write-Host "  whisper.cpp already installed." -ForegroundColor Green
 }
 
-# 3. Download Whisper tiny model
+# 3. Download Whisper small model
 Write-Host "`n[3/3] Downloading Whisper model..." -ForegroundColor Yellow
 $modelDir = ".\models"
 New-Item -ItemType Directory -Force -Path $modelDir | Out-Null
 
-if (-not (Test-Path "$modelDir\ggml-tiny-q5_1.bin")) {
-    $modelUrl = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin"
-    Write-Host "  Downloading ggml-tiny-q5_1.bin (~31MB)..." -ForegroundColor Gray
-    Invoke-WebRequest -Uri $modelUrl -OutFile "$modelDir\ggml-tiny-q5_1.bin" -UseBasicParsing
+if (-not (Test-Path "$modelDir\ggml-small.bin")) {
+    $modelUrl = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+    Write-Host "  Downloading ggml-small.bin (~466MB)..." -ForegroundColor Gray
+    Invoke-WebRequest -Uri $modelUrl -OutFile "$modelDir\ggml-small.bin" -UseBasicParsing
     Write-Host "  Model downloaded!" -ForegroundColor Green
 } else {
     Write-Host "  Model already downloaded." -ForegroundColor Green

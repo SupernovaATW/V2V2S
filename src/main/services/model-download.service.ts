@@ -2,7 +2,7 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { getUserModelsDir } from '../utils/paths';
+import { getBundledModelPath, getUserModelsDir } from '../utils/paths';
 import { MODELS, type ModelDefinition } from '../../shared/model-definitions';
 
 export interface DownloadProgress {
@@ -19,14 +19,14 @@ export function getModelDef(modelId: string): ModelDefinition | undefined {
 export function isModelDownloaded(modelId: string): boolean {
   const def = getModelDef(modelId);
   if (!def) return false;
-  if (def.bundled) return true;
+  if (def.bundled && fs.existsSync(getBundledModelPath())) return true;
   const modelPath = path.join(getUserModelsDir(), def.filename);
   return fs.existsSync(modelPath);
 }
 
 export function getDownloadedModels(): string[] {
   return MODELS.filter((m) => {
-    if (m.bundled) return true;
+    if (m.bundled && fs.existsSync(getBundledModelPath())) return true;
     return fs.existsSync(path.join(getUserModelsDir(), m.filename));
   }).map((m) => m.id);
 }
